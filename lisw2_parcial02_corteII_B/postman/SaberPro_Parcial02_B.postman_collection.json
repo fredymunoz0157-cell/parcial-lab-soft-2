@@ -1,0 +1,264 @@
+{
+  "info": {
+    "_postman_id": "b62f8c10-2026-4b02-9a11-5abe4b400002",
+    "name": "SaberPro_Parcial02_CorteII_B_Puntos1_y_2",
+    "description": "Colección oficial Postman v2.1.0 para evaluar los Puntos 1 (Builder + State) y 2 (REST Síncrono + RabbitMQ Asíncrono) del Segundo Parcial Práctico de Laboratorio (Corte 2 - Grupo B).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Validation Service (:8082)",
+      "item": [
+        {
+          "name": "1. Validar Justificación Válida (> 15 caracteres) - 200 OK",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"context\": \"Contexto de prueba directa en Validation Service.\",\n  \"statement\": \"¿Por qué es importante validar la justificación del reactivo?\",\n  \"justification\": \"Esta justificación tiene más de quince caracteres y cumple la regla de negocio.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8082/validate",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8082",
+              "path": [
+                "validate"
+              ]
+            },
+            "description": "Prueba directa al endpoint POST /validate en Validation Service (:8082) con justificación > 15 caracteres."
+          },
+          "response": []
+        },
+        {
+          "name": "2. Validar Justificación Inválida (<= 15 caracteres) - 400 Bad Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"context\": \"Contexto de prueba directa en Validation Service.\",\n  \"statement\": \"¿Por qué falla esta validación?\",\n  \"justification\": \"Muy corta\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8082/validate",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8082",
+              "path": [
+                "validate"
+              ]
+            },
+            "description": "Prueba directa al endpoint POST /validate en Validation Service (:8082) con justificación <= 15 caracteres."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Question Service (:8083) - Punto 1 y Punto 2",
+      "item": [
+        {
+          "name": "1. Crear Pregunta Válida (201 Created - Estado DRAFT)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"context\": \"En una arquitectura de microservicios para el Banco de Preguntas Saber PRO, se requiere desacoplar el envío a revisión de su procesamiento.\",\n  \"statement\": \"¿Qué mecanismo de comunicación se emplea para publicar el comando SubmitQuestionForReview sin bloquear al cliente?\",\n  \"justification\": \"La comunicación asíncrona mediante RabbitMQ permite responder HTTP 202 Accepted de inmediato y procesar la transición en segundo plano.\",\n  \"options\": [\n    {\n      \"text\": \"Mensajería asíncrona AMQP con RabbitMQ y exchange directo\",\n      \"correct\": true\n    },\n    {\n      \"text\": \"Acoplamiento de tablas compartidas sin servicio intermedio\",\n      \"correct\": false\n    },\n    {\n      \"text\": \"Invocación bloqueante por sockets crudos sin colas\",\n      \"correct\": false\n    },\n    {\n      \"text\": \"Lectura manual de archivos planos locales en el cliente\",\n      \"correct\": false\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8083/questions",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8083",
+              "path": [
+                "questions"
+              ]
+            },
+            "description": "Invoca síncronamente a Validation Service (:8082), construye la pregunta con QuestionBuilder (4 opciones y 1 correcta), la guarda en estado DRAFT y retorna 201 Created."
+          },
+          "response": []
+        },
+        {
+          "name": "2. Crear Pregunta con Justificación Corta <= 15 chars (400 Bad Request)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"context\": \"Contexto de prueba para fallo de validación síncrona en Validation Service (:8082).\",\n  \"statement\": \"¿Cuál es la respuesta HTTP cuando la justificación tiene 15 caracteres o menos?\",\n  \"justification\": \"Muy corta\",\n  \"options\": [\n    {\n      \"text\": \"HTTP 400 Bad Request sin guardar el registro\",\n      \"correct\": true\n    },\n    {\n      \"text\": \"HTTP 201 Created\",\n      \"correct\": false\n    },\n    {\n      \"text\": \"HTTP 202 Accepted\",\n      \"correct\": false\n    },\n    {\n      \"text\": \"HTTP 500 Internal Server Error\",\n      \"correct\": false\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8083/questions",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8083",
+              "path": [
+                "questions"
+              ]
+            },
+            "description": "Falla en la validación síncrona contra Validation Service (:8082) por justificación <= 15 caracteres y retorna 400 Bad Request sin guardar."
+          },
+          "response": []
+        },
+        {
+          "name": "3. Crear Pregunta con Estructura Inválida en Builder != 4 opciones (400 Bad Request)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"context\": \"Contexto de prueba para validación del método build() en QuestionBuilder.\",\n  \"statement\": \"¿Qué ocurre si se envían menos de 4 opciones de respuesta?\",\n  \"justification\": \"Esta justificación supera ampliamente los quince caracteres requeridos por Validation Service.\",\n  \"options\": [\n    {\n      \"text\": \"Opción única correcta\",\n      \"correct\": true\n    },\n    {\n      \"text\": \"Un solo distractor\",\n      \"correct\": false\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8083/questions",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8083",
+              "path": [
+                "questions"
+              ]
+            },
+            "description": "Valida que QuestionBuilder.build() rechace reactivos que no tengan exactamente 4 opciones y 1 respuesta correcta."
+          },
+          "response": []
+        },
+        {
+          "name": "4. Enviar Pregunta a Revisión via RabbitMQ (202 Accepted + operationId)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8083/questions/1/submit",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8083",
+              "path": [
+                "questions",
+                "1",
+                "submit"
+              ]
+            },
+            "description": "Publica el comando SubmitQuestionForReview en saberpro.direct.exchange (routing key: question.submit) y retorna 202 Accepted con operationId."
+          },
+          "response": []
+        },
+        {
+          "name": "5. Consultar Pregunta 1 en Question Service (Estado PENDING_REVIEW)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8083/questions/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8083",
+              "path": [
+                "questions",
+                "1"
+              ]
+            },
+            "description": "Verifica que la pregunta ID 1 haya cambiado de estado DRAFT a PENDING_REVIEW tras el procesamiento asíncrono."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Lifecycle Service (:8084) - Estado y Transición",
+      "item": [
+        {
+          "name": "1. Consultar Estado PENDING_REVIEW en Lifecycle Service (:8084)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8084/lifecycle/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8084",
+              "path": [
+                "lifecycle",
+                "1"
+              ]
+            },
+            "description": "Consulta en Lifecycle Service (:8084) el estado actual (PENDING_REVIEW) y el operationId procesado por @RabbitListener."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
